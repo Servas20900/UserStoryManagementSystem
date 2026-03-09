@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="CasoEstudio1SMA/StoryApi.csproj" />
+  <Project Path="EstimationApi/EstimationApi.csproj" />
+  <Project Path="WebMVC/WebMVC.csproj" />
+</Solution>

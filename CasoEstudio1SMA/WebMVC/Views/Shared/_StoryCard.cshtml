@@ -1,0 +1,46 @@
+@model UserStoryViewModel
+
+@{
+    var cardColor = (ViewData["Color"] as string) ?? "#f8f9fa";
+    var borderColor = (ViewData["BorderColor"] as string) ?? "#ced4da";
+    var isDone = string.Equals(Model.Estado, "Done", StringComparison.OrdinalIgnoreCase);
+    var isLargeEstimate = Model.Estimacion > 13;
+}
+
+<div class="card mb-3" style="background-color:@cardColor;border-left:4px solid @borderColor;">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-1">@Model.Titulo</h5>
+            @if (isDone)
+            {
+                <span class="badge text-bg-success">&#10003; Done</span>
+            }
+        </div>
+
+        <p class="mb-2">@Model.Descripcion</p>
+        <small class="d-block">Asignado: @Model.AsignadoA</small>
+        <small class="d-block">Estimacion: @Model.Estimacion</small>
+        <small class="d-block mb-2">Estado: @Model.Estado</small>
+
+        @if (isLargeEstimate)
+        {
+            <div class="alert alert-warning py-1 px-2 mb-2" role="alert">
+                Estimacion alta: mayor a 13
+            </div>
+        }
+
+        <form asp-action="UpdateStatus" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+
+            <select name="newStatus" class="form-select mt-2">
+                <option selected="@(Model.Estado == "Backlog")">Backlog</option>
+                <option selected="@(Model.Estado == "To Do" || Model.Estado == "ToDo")">To Do</option>
+                <option selected="@(Model.Estado == "In Progress" || Model.Estado == "InProgress")">In Progress</option>
+                <option selected="@(Model.Estado == "Done")">Done</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary btn-sm mt-2">Mover</button>
+        </form>
+    </div>
+</div>

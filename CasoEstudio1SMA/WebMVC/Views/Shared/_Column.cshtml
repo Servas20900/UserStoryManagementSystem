@@ -1,0 +1,43 @@
+@model ColumnViewModel
+
+@functions {
+    private static string GetCardColor(string estado)
+    {
+        return estado.Trim() switch
+        {
+            "Backlog" => "#f8f9fa",
+            "To Do" or "ToDo" => "#d1ecf1",
+            "In Progress" or "InProgress" => "#fff3cd",
+            "Done" => "#d4edda",
+            _ => "#f8f9fa"
+        };
+    }
+
+    private static string GetBorderColor(string estado)
+    {
+        return estado.Trim() switch
+        {
+            "Backlog" => "#ced4da",
+            "To Do" or "ToDo" => "#0dcaf0",
+            "In Progress" or "InProgress" => "#ffc107",
+            "Done" => "#198754",
+            _ => "#ced4da"
+        };
+    }
+}
+
+<div class="col-md-3">
+    <h4>@Model.Name</h4>
+
+    @foreach (var story in Model.Stories)
+    {
+        @await Html.PartialAsync(
+            "_StoryCard",
+            story,
+            new ViewDataDictionary(ViewData)
+            {
+                ["Color"] = GetCardColor(story.Estado),
+                ["BorderColor"] = GetBorderColor(story.Estado)
+            })
+    }
+</div>
