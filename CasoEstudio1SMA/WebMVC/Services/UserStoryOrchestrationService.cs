@@ -29,6 +29,25 @@ namespace WebMVC.Services
             return stories;
         }
 
+        public async Task<UserStoryViewModel?> GetByIdAsync(int id)
+        {
+            var storyApiClient = _httpClientFactory.CreateClient("StoryApi");
+            var response = await storyApiClient.GetAsync($"api/userstories/{id}");
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var story = await response.Content.ReadFromJsonAsync<UserStoryViewModel>();
+            if (story is null)
+            {
+                return null;
+            }
+
+            story.AvatarImageUrl = await ResolveAvatarImageUrlAsync(story.AvatarId);
+            return story;
+        }
+
         public async Task CreateAsync(CreateUserStoryViewModel model)
         {
             var estimationApiClient = _httpClientFactory.CreateClient("EstimationApi");
@@ -74,6 +93,41 @@ namespace WebMVC.Services
 
             var updateResponse = await storyApiClient.PutAsJsonAsync($"api/userstories/{id}", payload);
             updateResponse.EnsureSuccessStatusCode();
+        }
+
+        public async Task<bool> UpdateAsync(EditUserStoryViewModel model)
+        {
+            var storyApiClient = _httpClientFactory.CreateClient("StoryApi");
+            var payload = new
+            {
+                model.Titulo,
+                model.Descripcion,
+                model.UserId,
+                model.Estado,
+                model.Estimacion
+            };
+
+            var response = await storyApiClient.PutAsJsonAsync($"api/userstories/{model.Id}", payload);
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return false;
+            }
+
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var storyApiClient = _httpClientFactory.CreateClient("StoryApi");
+            var response = await storyApiClient.DeleteAsync($"api/userstories/{id}");
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return false;
+            }
+
+            response.EnsureSuccessStatusCode();
+            return true;
         }
 
         public async Task<List<UserViewModel>> GetUsersAsync()

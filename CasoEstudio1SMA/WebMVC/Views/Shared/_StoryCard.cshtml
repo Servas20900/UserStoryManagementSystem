@@ -49,5 +49,14 @@
 
             <button type="submit" class="btn btn-primary btn-sm mt-2">Mover</button>
         </form>
+
+        <div class="d-flex gap-2 mt-2">
+            <a asp-controller="Home" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm">Editar</a>
+            <form asp-controller="Home" asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
+            </form>
+        </div>
     </div>
 </div>

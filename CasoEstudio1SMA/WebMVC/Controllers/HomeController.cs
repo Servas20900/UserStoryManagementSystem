@@ -52,6 +52,66 @@ namespace WebMVC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var story = await _userStoryService.GetByIdAsync(id);
+            if (story is null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            var users = await _userStoryService.GetUsersAsync();
+            var model = new EditUserStoryViewModel
+            {
+                Id = story.Id,
+                Titulo = story.Titulo,
+                Descripcion = story.Descripcion,
+                UserId = story.UserId,
+                Estado = story.Estado,
+                Estimacion = story.Estimacion,
+                Users = users
+                    .Select(user => new SelectListItem
+                    {
+                        Value = user.Id.ToString(),
+                        Text = $"{user.Nombre} {user.Apellidos}".Trim()
+                    })
+                    .ToList()
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(EditUserStoryViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var users = await _userStoryService.GetUsersAsync();
+                model.Users = users
+                    .Select(user => new SelectListItem
+                    {
+                        Value = user.Id.ToString(),
+                        Text = $"{user.Nombre} {user.Apellidos}".Trim()
+                    })
+                    .ToList();
+
+                return View(model);
+            }
+
+            await _userStoryService.UpdateAsync(model);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _userStoryService.DeleteAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
