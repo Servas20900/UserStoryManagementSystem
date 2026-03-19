@@ -19,4 +19,59 @@ html {
 
 body {
   margin-bottom: 60px;
+  background: #eef4ff;
+}
+
+.pokemon-navbar {
+  background: #2563eb;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.22);
+}
+
+.pokemon-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.pokemon-brand:hover,
+.pokemon-brand:focus {
+  color: #dbeafe;
+}
+
+.pokemon-brand-icon {
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background-color: #ffffff;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2);
+}
+
+.pokemon-toggler {
+  border-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.pokemon-nav-link {
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+}
+
+.pokemon-nav-link:hover,
+.pokemon-nav-link:focus {
+  color: #1e3a8a;
+  background-color: #dbeafe;
+}
+
+@media (max-width: 991.98px) {
+  .pokemon-nav-link {
+    margin-top: 0.35rem;
+    margin-bottom: 0.35rem;
+    display: inline-block;
+  }
 }

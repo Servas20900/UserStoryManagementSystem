@@ -10,6 +10,10 @@ builder.Services.AddHttpClient("EstimationApi", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ApiSettings:EstimationApiBaseUrl"] ?? "http://localhost:5216/");
 });
+builder.Services.AddHttpClient("PokeApi", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:PokeApiBaseUrl"] ?? "https://pokeapi.co/");
+});
 builder.Services.AddScoped<WebMVC.Services.IUserStoryOrchestrationService, WebMVC.Services.UserStoryOrchestrationService>();
 
 var app = builder.Build();

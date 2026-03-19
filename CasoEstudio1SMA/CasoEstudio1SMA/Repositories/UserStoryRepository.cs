@@ -15,12 +15,18 @@ namespace CasoEstudio1SMA.Repositories
 
         public async Task<List<UserStory>> GetAllAsync()
         {
-            return await _context.UserStories.AsNoTracking().ToListAsync();
+            return await _context.UserStories
+                .AsNoTracking()
+                .Include(story => story.User)
+                .ToListAsync();
         }
 
         public async Task<UserStory?> GetByIdAsync(int id)
         {
-            return await _context.UserStories.AsNoTracking().FirstOrDefaultAsync(story => story.Id == id);
+            return await _context.UserStories
+                .AsNoTracking()
+                .Include(story => story.User)
+                .FirstOrDefaultAsync(story => story.Id == id);
         }
 
         public async Task<UserStory> CreateAsync(UserStory userStory)
@@ -40,7 +46,7 @@ namespace CasoEstudio1SMA.Repositories
 
             existing.Titulo = userStory.Titulo;
             existing.Descripcion = userStory.Descripcion;
-            existing.AsignadoA = userStory.AsignadoA;
+            existing.UserId = userStory.UserId;
             existing.Estado = userStory.Estado;
             existing.Estimacion = userStory.Estimacion;
 

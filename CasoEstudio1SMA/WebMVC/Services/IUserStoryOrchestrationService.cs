@@ -7,5 +7,7 @@ namespace WebMVC.Services
         Task<List<UserStoryViewModel>> GetAllAsync();
         Task CreateAsync(CreateUserStoryViewModel model);
         Task UpdateStatusAsync(int id, string newStatus);
+        Task<List<UserViewModel>> GetUsersAsync();
+        Task CreateUserAsync(CreateUserViewModel model);
     }
 }

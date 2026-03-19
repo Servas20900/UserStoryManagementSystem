@@ -13,8 +13,7 @@ namespace CasoEstudio1SMA.DTOs
         public string Descripcion { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100)]
-        public string AsignadoA { get; set; } = string.Empty;
+        public int UserId { get; set; }
 
         [Required]
         [StringLength(30)]

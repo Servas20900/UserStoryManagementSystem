@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace WebMVC.Models
 {
@@ -13,10 +14,11 @@ namespace WebMVC.Models
         public string Descripcion { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100)]
-        public string AsignadoA { get; set; } = string.Empty;
+        public int UserId { get; set; }
 
         [StringLength(30)]
         public string Estado { get; set; } = "Backlog";
+
+        public List<SelectListItem> Users { get; set; } = new();
     }
 }

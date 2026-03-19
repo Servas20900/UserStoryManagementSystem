@@ -15,8 +15,9 @@ namespace CasoEstudio1SMA.Models
         public string Descripcion { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100)]
-        public string AsignadoA { get; set; } = string.Empty;
+        public int UserId { get; set; }
+
+        public User User { get; set; } = null!;
 
         [Required]
         [StringLength(30)]

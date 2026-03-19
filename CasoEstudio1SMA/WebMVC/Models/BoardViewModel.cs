@@ -6,5 +6,6 @@ namespace WebMVC.Models
         public List<UserStoryViewModel> ToDo { get; set; } = new();
         public List<UserStoryViewModel> InProgress { get; set; } = new();
         public List<UserStoryViewModel> Done { get; set; } = new();
+        public CreateUserStoryViewModel CreateStory { get; set; } = new();
     }
 }

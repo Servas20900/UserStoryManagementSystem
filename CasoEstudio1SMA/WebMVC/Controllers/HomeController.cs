@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Diagnostics;
 using WebMVC.Models;
 using WebMVC.Services;
@@ -19,18 +20,23 @@ namespace WebMVC.Controllers
         public async Task<IActionResult> Index()
         {
             var stories = await _userStoryService.GetAllAsync();
-            var board = BuildBoard(stories);
+            var users = await _userStoryService.GetUsersAsync();
+            var board = BuildBoard(stories, users);
             return View("~/Views/Board/Index.cshtml", board);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateUserStoryViewModel model)
+        public async Task<IActionResult> Create([Bind(Prefix = "CreateStory")] CreateUserStoryViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 var stories = await _userStoryService.GetAllAsync();
-                var board = BuildBoard(stories);
+                var users = await _userStoryService.GetUsersAsync();
+                var board = BuildBoard(stories, users);
+                board.CreateStory.Titulo = model.Titulo;
+                board.CreateStory.Descripcion = model.Descripcion;
+                board.CreateStory.UserId = model.UserId;
                 return View("~/Views/Board/Index.cshtml", board);
             }
 
@@ -46,20 +52,28 @@ namespace WebMVC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        private static BoardViewModel BuildBoard(List<UserStoryViewModel> stories)
+        private static BoardViewModel BuildBoard(List<UserStoryViewModel> stories, List<UserViewModel> users)
         {
-            var board = new BoardViewModel();
+            var board = new BoardViewModel
+            {
+                CreateStory = new CreateUserStoryViewModel
+                {
+                    Estado = "Backlog",
+                    Users = users
+                        .Select(user => new SelectListItem
+                        {
+                            Value = user.Id.ToString(),
+                            Text = $"{user.Nombre} {user.Apellidos}".Trim()
+                        })
+                        .ToList()
+                }
+            };
 
             foreach (var story in stories)
             {

@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using WebMVC.Models;
 
 namespace WebMVC.Services
@@ -18,22 +19,26 @@ namespace WebMVC.Services
             var response = await storyApiClient.GetAsync("api/userstories");
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<List<UserStoryViewModel>>() ?? new List<UserStoryViewModel>();
+            var stories = await response.Content.ReadFromJsonAsync<List<UserStoryViewModel>>() ?? new List<UserStoryViewModel>();
+
+            foreach (var story in stories)
+            {
+                story.AvatarImageUrl = await ResolveAvatarImageUrlAsync(story.AvatarId);
+            }
+
+            return stories;
         }
 
         public async Task CreateAsync(CreateUserStoryViewModel model)
         {
             var estimationApiClient = _httpClientFactory.CreateClient("EstimationApi");
-            var estimationResponse = await estimationApiClient.GetAsync("api/estimation");
-            estimationResponse.EnsureSuccessStatusCode();
-
-            var estimation = await estimationResponse.Content.ReadFromJsonAsync<int>();
+            var estimation = await GetEstimationOrFallbackAsync(estimationApiClient);
 
             var payload = new
             {
                 model.Titulo,
                 model.Descripcion,
-                model.AsignadoA,
+                model.UserId,
                 Estado = string.IsNullOrWhiteSpace(model.Estado) ? "Backlog" : model.Estado,
                 Estimacion = estimation
             };
@@ -62,13 +67,40 @@ namespace WebMVC.Services
             {
                 story.Titulo,
                 story.Descripcion,
-                story.AsignadoA,
+                story.UserId,
                 Estado = normalizedStatus,
                 story.Estimacion
             };
 
             var updateResponse = await storyApiClient.PutAsJsonAsync($"api/userstories/{id}", payload);
             updateResponse.EnsureSuccessStatusCode();
+        }
+
+        public async Task<List<UserViewModel>> GetUsersAsync()
+        {
+            var storyApiClient = _httpClientFactory.CreateClient("StoryApi");
+            var response = await storyApiClient.GetAsync("api/users");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new List<UserViewModel>();
+            }
+
+            return await response.Content.ReadFromJsonAsync<List<UserViewModel>>() ?? new List<UserViewModel>();
+        }
+
+        public async Task CreateUserAsync(CreateUserViewModel model)
+        {
+            var storyApiClient = _httpClientFactory.CreateClient("StoryApi");
+            var payload = new
+            {
+                model.Nombre,
+                model.Apellidos,
+                model.Email
+            };
+
+            var response = await storyApiClient.PostAsJsonAsync("api/users", payload);
+            response.EnsureSuccessStatusCode();
         }
 
         private static string NormalizeStatus(string status)
@@ -88,6 +120,71 @@ namespace WebMVC.Services
                 "Done" => "Done",
                 _ => "Backlog"
             };
+        }
+
+        private static int GetLocalEstimationFallback()
+        {
+            int[] fibonacciValues = { 2, 3, 5, 8, 13 };
+            return fibonacciValues[Random.Shared.Next(fibonacciValues.Length)];
+        }
+
+        private static string GetImageFallback(int avatarId)
+        {
+            var normalized = avatarId is < 1 or > 151 ? 1 : avatarId;
+            return $"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{normalized}.png";
+        }
+
+        private async Task<int> GetEstimationOrFallbackAsync(HttpClient estimationApiClient)
+        {
+            try
+            {
+                var estimationResponse = await estimationApiClient.GetAsync("api/estimation");
+                if (!estimationResponse.IsSuccessStatusCode)
+                {
+                    return GetLocalEstimationFallback();
+                }
+
+                var estimation = await estimationResponse.Content.ReadFromJsonAsync<int>();
+                return estimation is 2 or 3 or 5 or 8 or 13 ? estimation : GetLocalEstimationFallback();
+            }
+            catch
+            {
+                return GetLocalEstimationFallback();
+            }
+        }
+
+        private async Task<string> ResolveAvatarImageUrlAsync(int avatarId)
+        {
+            try
+            {
+                var normalized = avatarId is < 1 or > 151 ? 1 : avatarId;
+                var pokeApiClient = _httpClientFactory.CreateClient("PokeApi");
+                var response = await pokeApiClient.GetAsync($"api/v2/pokemon/{normalized}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return GetImageFallback(normalized);
+                }
+
+                var payload = await response.Content.ReadAsStringAsync();
+                using var document = JsonDocument.Parse(payload);
+
+                if (document.RootElement.TryGetProperty("sprites", out var sprites)
+                    && sprites.TryGetProperty("front_default", out var frontDefault)
+                    && frontDefault.ValueKind == JsonValueKind.String)
+                {
+                    var url = frontDefault.GetString();
+                    if (!string.IsNullOrWhiteSpace(url))
+                    {
+                        return url;
+                    }
+                }
+
+                return GetImageFallback(normalized);
+            }
+            catch
+            {
+                return GetImageFallback(avatarId);
+            }
         }
     }
 }

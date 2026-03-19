@@ -38,6 +38,11 @@ namespace CasoEstudio1SMA.Controllers
         public async Task<ActionResult<UserStoryResponseDto>> Create([FromBody] UserStoryCreateDto dto)
         {
             var created = await _service.CreateAsync(dto);
+            if (created is null)
+            {
+                return BadRequest(new { message = "Usuario asignado no valido" });
+            }
+
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 

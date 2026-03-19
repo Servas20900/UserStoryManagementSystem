@@ -6,7 +6,7 @@ namespace CasoEstudio1SMA.Services
     {
         Task<List<UserStoryResponseDto>> GetAllAsync();
         Task<UserStoryResponseDto?> GetByIdAsync(int id);
-        Task<UserStoryResponseDto> CreateAsync(UserStoryCreateDto dto);
+        Task<UserStoryResponseDto?> CreateAsync(UserStoryCreateDto dto);
         Task<bool> UpdateAsync(int id, UserStoryUpdateDto dto);
         Task<bool> DeleteAsync(int id);
     }
